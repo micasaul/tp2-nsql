@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       capTemp.forEach(c => {
         const li = document.createElement("li");
-        li.textContent = `${c.numero}: ${c.nombre} [${c.estado}] `;
+        li.textContent = `${c.numero}: ${c.nombre}`;
 
         if (c.estado === "disponible") {
           const btn = document.createElement("button");
@@ -49,7 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
           btn.textContent = "Confirmar";
           btn.addEventListener("click", () => confirmarCap(c.numero, 1500));
           li.appendChild(btn);
-        } 
+        } else if (c.estado === "alquilado") {
+          const btn = document.createElement("button");
+          btn.textContent = `Alquilado`; 
+          btn.disabled = true; 
+          li.appendChild(btn);
+        }
         lista.appendChild(li);
       });
 
