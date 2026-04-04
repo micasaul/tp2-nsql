@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from redis import Redis
 
 app = Flask(__name__)
@@ -41,6 +41,10 @@ def cargar_datos():
             "nombre": nombre,
             "estado": "disponible"
         })
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/capitulos', methods=['GET'])
 def listar_capitulos():
