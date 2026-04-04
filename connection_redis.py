@@ -47,6 +47,13 @@ def listar_capitulos():
     resultado = []
     for i in range(1, 25):
         cap = r.hgetall(f"capitulo:{i}")
+
+        key_reserva = f"reserva:{i}"
+
+        if cap["estado"] == "reservado" and not r.exists(key_reserva):
+            r.hset(f"capitulo:{i}", "estado", "disponible")
+            cap["estado"] = "disponible"
+
         resultado.append({
             "numero": i,
             "nombre": cap.get("nombre"),
@@ -54,6 +61,25 @@ def listar_capitulos():
         })
 
     return jsonify(resultado)
+
+@app.route('/reservar/<int:id>', methods=['POST'])
+def reservar(id):
+    key_cap = f"capitulo:{id}"
+    key_reserva = f"reserva:{id}"
+
+    cap = r.hgetall(key_cap)
+
+    if not cap:
+        return {"error": "No existe"}, 404
+
+    if cap["estado"] != "disponible":
+        return {"error": "No disponible"}, 400
+
+    r.set(key_reserva, "reservado", ex=240)
+
+    r.hset(key_cap, "estado", "reservado")
+
+    return {"mensaje": "Capítulo reservado por 4 minutos"}
 
 if __name__ == '__main__':
     cargar_datos()
