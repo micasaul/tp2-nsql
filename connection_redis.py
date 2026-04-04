@@ -47,10 +47,14 @@ def listar_capitulos():
     resultado = []
     for i in range(1, 25):
         cap = r.hgetall(f"capitulo:{i}")
-
         key_reserva = f"reserva:{i}"
+        key_alquiler = f"alquiler:{i}"
 
         if cap["estado"] == "reservado" and not r.exists(key_reserva):
+            r.hset(f"capitulo:{i}", "estado", "disponible")
+            cap["estado"] = "disponible"
+
+        if cap["estado"] == "alquilado" and not r.exists(key_alquiler):
             r.hset(f"capitulo:{i}", "estado", "disponible")
             cap["estado"] = "disponible"
 
@@ -80,6 +84,28 @@ def reservar(id):
     r.hset(key_cap, "estado", "reservado")
 
     return {"mensaje": "Capítulo reservado por 4 minutos"}
+
+@app.route('/confirmar/<int:id>/<float:precio>', methods=['POST'])
+def alquilar(id, precio):
+    key_cap = f"capitulo:{id}"
+    key_reserva = f"reserva:{id}"
+    key_alquiler = f"alquiler:{id}"
+
+    cap = r.hgetall(key_cap)
+
+    if not cap:
+        return {"error": "No existe"}, 404
+
+    if cap["estado"] != "reservado":
+        return {"error": "El capítulo no está reservado"}, 400
+
+    r.set(key_alquiler, precio, ex=86400)
+
+    r.hset(key_cap, "estado", "alquilado")
+
+    r.delete(key_reserva)
+
+    return {"mensaje": "Pago confirmado, capítulo alquilado por 24 hs"}
 
 if __name__ == '__main__':
     cargar_datos()
