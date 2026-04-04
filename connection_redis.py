@@ -89,7 +89,7 @@ def reservar(id):
 
     return {"mensaje": "Capítulo reservado por 4 minutos"}
 
-@app.route('/confirmar/<int:id>/<float:precio>', methods=['POST'])
+@app.route('/confirmar/<int:id>/<int:precio>', methods=['POST'])
 def alquilar(id, precio):
     key_cap = f"capitulo:{id}"
     key_reserva = f"reserva:{id}"
